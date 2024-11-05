@@ -1,0 +1,6 @@
+<launch>
+    <!-- <include file="$(find velodyne_pointcloud)/launch/VLP16_points.launch"/> -->
+    <node pkg="camera_3dlidar_calibration" type="camera.py" name="camera_node"></node>
+    <node pkg="camera_3dlidar_calibration" type="lidar_pre" name="lidar_node"></node>
+    <node pkg="camera_3dlidar_calibration" type="calibration" name="calibration"></node>
+</launch>

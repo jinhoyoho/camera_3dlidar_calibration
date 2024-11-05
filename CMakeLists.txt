@@ -20,18 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
-## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  obj_info.msg
-)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  sensor_msgs
-)
 
 catkin_package(
   INCLUDE_DIRS include ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS}

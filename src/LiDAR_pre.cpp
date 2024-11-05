@@ -5,6 +5,8 @@
 // 생성자
 LiDAR_pre::LiDAR_pre(ros::NodeHandle& nh)
 {
+    ROS_INFO("Lidar_pre on!");
+    
     point_sub_ = nh.subscribe("/velodyne_points", 1, &LiDAR_pre::cloud_callBack, this);
 
     pub = nh.advertise<sensor_msgs::PointCloud2> ("lidar_pre", 1);
@@ -80,7 +82,7 @@ void LiDAR_pre::cloud_callBack(const sensor_msgs::PointCloud2& msg)
     // 포인트 클라우드 변환
     for (auto& point : cloud_data.points) {
         Eigen::Vector3d p(point.x, point.y, point.z);
-        p = computeRotationMatrix(0, 10, 0) * p; // 회전 변환 적용
+        p = computeRotationMatrix(0, 0, 0) * p; // 회전 변환(roll, pitch, yaw) 적용
         point.x = p(0);
         point.y = p(1);
         point.z = p(2);

@@ -10,15 +10,12 @@ calibration::calibration(ros::NodeHandle& nh)
 
 void calibration::lidar_callBack(const sensor_msgs::PointCloud2ConstPtr& msg)
 {
-    last_lidar_time = msg->header.stamp; // 라이다 스탬프
-
     pcl::PCLPointCloud2 cloud_intermediate; // 포인트 클라우드 데이터 저장
 
     // 포인터가 가리키는 포인트 클라우드 데이터를 cloud_intermediate에 저장
     pcl_conversions::toPCL(*msg, cloud_intermediate);
     // cloud_intermediate에 저장된 PCL 포인트 클라우드 데이터를 cloud 객체로 변환
     pcl::fromPCLPointCloud2(cloud_intermediate, cloud);
-
     // std::vector<cv::Point3f>로 변환
     std::vector<cv::Point3f> objectPoints;
 
@@ -31,16 +28,14 @@ void calibration::lidar_callBack(const sensor_msgs::PointCloud2ConstPtr& msg)
 }
 
 
-void calibration::object_callBack(const camera_3dlidar_calibration::obj_info::ConstPtr& msg)
+void calibration::object_callBack(const sensor_msgs::Image::ConstPtr& msg)
 {
-    last_image_time = msg->image.header.stamp; // 이미지 스탬프
-
-    if ((last_image_time - last_lidar_time).toSec() < 0.01) { // 10ms 이내의 차이
-            
-        frame = cv::Mat(msg->image.height, msg->image.width, CV_8UC3, const_cast<unsigned char*>(msg->image.data.data()), msg->image.step);
-        
-        this->projection(frame);
-    }
+    frame = cv::Mat(msg->height, msg->width, CV_8UC3, const_cast<unsigned char*>(msg->data.data()), msg->step);
+    
+    this->projection(frame);
+    
+    cv::imshow("Projection Image", frame);
+    if (cv::waitKey(1) == 27) exit(-1);
 }
 
 cv::Mat_<double> calibration::computeRotationMatrix(double roll, double pitch, double yaw) {
@@ -78,11 +73,11 @@ void calibration::do_cali()
                                             0, 0, 1);
 
     // 라이다 -> 카메라 좌표계로 일치시키는 행렬
-    rvec = (cv::Mat_<double>(3, 3) << 0, 1, 0,
-                                     0, 0, 1,
-                                     -1, 0, 0);
+    rvec = (cv::Mat_<double>(3, 3) << 1, 0, 0,
+                                     0, 1, 0,
+                                     0, 0, 1);
 
-    // rvec = rvec * this->computeRotationMatrix(0, 0, 270);
+    rvec = rvec * this->computeRotationMatrix(90, -90, 0);
 
     tvec = (cv::Mat_<double>(3, 1) << lidar_x - camera_x, lidar_y - camera_y, lidar_z - camera_z); 
     distCoeffs = cv::Mat::zeros(4, 1, CV_64F); // 왜곡 없음
@@ -100,28 +95,20 @@ void calibration::projection(cv::Mat frame)
         // lidar_points가 존재했을때 실행
         if(lidar_points.size())
         {
-            // 디버깅용 이미지
-            cv::Mat copy_frame = frame;
-
-             // 이미지 포인트를 저장할 벡터
+            // 이미지 포인트를 저장할 벡터
             std::vector<cv::Point2f> imagePoints;
             
             // 3D 포인트를 2D 이미지 평면으로 투영
             cv::projectPoints(lidar_points, rvec, tvec, cameraMatrix, distCoeffs, imagePoints);
             
-            std::map<int, std::vector<cv::Point3f>> classPoints;    // 클래스별 라이다 좌표 저장
-
             for (size_t i=0; i < imagePoints.size(); i++)
             {
                 const auto& imagePoint = imagePoints[i];
                 int x = static_cast<int>(imagePoint.x); // X 좌표
                 int y = static_cast<int>(imagePoint.y); // Y 좌표
 
-                cv::circle(copy_frame, cv::Point(x, y), 3, cv::Scalar(0, 0, 255), -1); // 점 찍기
+                cv::circle(frame, cv::Point(x, y), 3, cv::Scalar(0, 0, 255), -1); // 점 찍기
             }
-
-            cv::imshow("Projection Image", copy_frame);
-            if (cv::waitKey(1) == 27) exit(-1);
         }
     }
     catch (cv_bridge::Exception& e)
