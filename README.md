@@ -8,16 +8,21 @@ Web camera and 3D Lidar calibration code
 **You have to change intrinsic and extrinsic parameter with my code!**
 
 ![rqt_graph](./jpg/rqt_graph.png)
+rqt_graph using ros bag file.
+1. Receive camera and lidar raw data.
+2. Do preprocess them each.
+- lidar -> preprocessing(ROI->Voxel->RANSAC->DBSCAN)
+- camera -> yolo
+3. Do calibration using them and rotation matrix.
 
 ## Installation
 
-### Prerequisites
+### Prerequisites (My version)
 
 - Ubuntu = 20.04
 - ROS1 Noetic
-- Python
-- Pytorch
-- CUDA
+- Python = 3.10.14
+- Pytorch = 1.12.0 (with CUDA)
 - Ultralytics
 
 ## Clone this repository
@@ -30,15 +35,15 @@ git clone https://github.com/jinhoyoho/camera_3dlidar_calibration.git
 
 ```Shell
 # Create conda virtual environment
-conda create -n calibration python=3.12 -y
+conda create -n calibration python=3.10 -y
 # Activate conda virtual environment
 conda activate calibration
 
-# Install requirements
-pip install -r requirements.txt
+# Install Ultralytics
+pip install ultralytics
 
 # Install Pytorch and CUDA
-pip
+pip install torch==1.12.0+cu116 torchvision==0.13.0+cu116 torchaudio==0.12.0 --extra-index-url https://download.pytorch.org/whl/cu116
 
 ```
 
@@ -50,7 +55,9 @@ catkin_make
 ```
 
 ```Shell
+# Execute three execute files.
 rosrun camera_3dlidar_calibration camera.py
+rosrun camera_3dlidar_calibration lidar_pre
 rosrun camera_3dlidar_calibration calibration
 ```
 
