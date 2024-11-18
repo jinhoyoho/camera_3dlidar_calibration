@@ -14,7 +14,6 @@ class IMGParser:
     def __init__(self):
         rospy.init_node('image_parser', anonymous=True)
         self.image_sub = rospy.Subscriber("/image_jpeg/compressed", CompressedImage, self.callback)
-        self.traffic_image_pub = rospy.Publisher('traffic_image', Image, queue_size=10)
         self.obj_pub = rospy.Publisher('person', Image, queue_size=10)
         self.is_image = False
         self.br = CvBridge()
@@ -51,31 +50,6 @@ class IMGParser:
                         top = int(box[3])
 
                         image_copy = cv2.rectangle(image_copy, (left, bottom), (right, top), (0, 0, 255), 2)
-                            
-
-                    elif box[4] > 0.3 and label == 'traffic light':
-                        left = int(box[0])
-                        bottom = int(box[1])  # top보다 더 작음
-                        right = int(box[2])
-                        top = int(box[3])
-
-                        # 가로가 더 긴 신호등은 건너뛰기
-                        if abs(left - right) > abs(bottom - top):
-                            continue
-
-                        # image를 crop해서 전달
-                        if bottom < top and left < right:  # 유효한 크롭 범위 확인
-                            traffic_image_copy = image_copy[bottom:top, left:right]
-                        else:
-                            rospy.logwarn("Invalid crop area for traffic light.")
-
-                        # 이미지 크기 확인
-                        if traffic_image_copy.size == 0 or traffic_image_copy.shape[0] == 0 or traffic_image_copy.shape[1] == 0:
-                            rospy.logwarn("Empty image copy. Skipping publishing.")
-                            continue  # 이미지가 유효하지 않으면 건너뜀
-
-                        self.traffic_image_pub.publish(self.br.cv2_to_imgmsg(traffic_image_copy))
-
                     
                 self.obj_pub.publish(self.br.cv2_to_imgmsg(image_copy))
 

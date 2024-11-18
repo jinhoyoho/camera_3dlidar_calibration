@@ -12,7 +12,7 @@ rqt_graph using ros bag file.
 1. Receive camera and lidar raw data.
 2. Do preprocess them each.
 - lidar -> preprocessing(ROI->Voxel->RANSAC->DBSCAN)
-- camera -> yolo
+- camera -> yolo (I only detect 'person' class. You can change it at 'camera.py')
 3. Do calibration using them and rotation matrix.
 
 ## Installation
