@@ -20,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
-
 catkin_package(
   INCLUDE_DIRS include ${OpenCV_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS}
   LIBRARIES camera_3dlidar_calibration

@@ -24,6 +24,7 @@ rqt_graph using ros bag file.
 - Python = 3.10.14
 - Pytorch = 1.12.0 (with CUDA)
 - Ultralytics
+- OpenCV
 
 ## Clone this repository
 
@@ -59,6 +60,10 @@ catkin_make
 rosrun camera_3dlidar_calibration camera.py
 rosrun camera_3dlidar_calibration lidar_pre
 rosrun camera_3dlidar_calibration calibration
+```
+or
+```Shell
+roslaunch camera_3dlidar_calibration calibration.launch
 ```
 
 ## Result
